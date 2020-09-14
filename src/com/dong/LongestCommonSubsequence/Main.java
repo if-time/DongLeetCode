@@ -11,10 +11,11 @@ package com.dong.LongestCommonSubsequence;
 public class Main {
     public static void main(String[] args) {
         Main main = new Main();
-        System.out.println(main.longestCommonSubsequence("afdsfasdf", "asfascec"));;
+        System.out.println(main.longestCommonSubsequenceLength("afdsfasdf", "asfascec"));
+        ;
     }
 
-    public int longestCommonSubsequence(String s, String t) {
+    public int longestCommonSubsequenceLength(String s, String t) {
         if (s.isEmpty() || t.isEmpty()) {
             return 0;
         }
@@ -43,5 +44,59 @@ public class Main {
             }
         }
         return dp[m][n];
+    }
+
+    int NONE = 0; // 回退终点
+    int UPPER_LEFT = 1; // 向左上回退
+    int UPPER = 2; // 向上回退
+    int LEFT = 3; // 向左回退
+
+    public String longestCommonSubsequence(String s, String t) {
+        if (s.isEmpty() || t.isEmpty()) {
+            return "";
+        }
+        int m = s.length();
+        int n = t.length();
+        int[][] dp = new int[m + 1][n + 1];
+        // back 数组的取值只可能是 UPPER_LEFT、UPPER、LEFT 或 NONE
+        int[][] back = new int[m + 1][n + 1];
+        for (int i = 0; i <= m; i++) {
+            for (int j = 0; j <= n; j++) {
+                // 计算 DP 数组与 back 数组
+                if (i == 0 || j == 0) {
+                    dp[i][j] = 0;
+                    back[i][j] = NONE;
+                } else {
+                    if (s.charAt(i - 1) == t.charAt(j - 1)) {
+                        dp[i][j] = dp[i - 1][j - 1] + 1;
+                        back[i][j] = UPPER_LEFT;
+                    } else if (dp[i - 1][j] > dp[i][j - 1]) {
+                        dp[i][j] = dp[i - 1][j];
+                        back[i][j] = UPPER;
+                    } else {
+                        dp[i][j] = dp[i][j - 1];
+                        back[i][j] = LEFT;
+                    }
+                }
+            }
+        }
+        // 根据 back 数组回退，得到具体的 LCS
+        int i = m;
+        int j = n;
+        StringBuilder sb = new StringBuilder();
+        while (i > 0 && j > 0) {
+            if (back[i][j] == UPPER_LEFT) {
+                sb.append(s.charAt(i - 1));
+                i--;
+                j--;
+            } else if (back[i][j] == UPPER) {
+                i--;
+            } else if (back[i][j] == LEFT) {
+                j--;
+            } else {
+                break;
+            }
+        }
+        return sb.reverse().toString();
     }
 }
